@@ -1,0 +1,152 @@
+<div class="container">
+
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      Start new job
+    </div>
+
+    <div class="panel-body">
+      <!-- TODO(amaijazi): We might want to add better validation, e.g., on length and allowable characters -->
+      <!-- http://scotch.io/tutorials/javascript/angularjs-form-validation seems like a good reference for this -->
+      <form role="form" ng-submit="createJob(jobToCreate)" name="jobCreateForm">
+        <div class="form-group">
+          <label for="redshiftEndpoint">Redshift ID</label>
+          <div class="input-group">
+            <input type="text" class="form-control " id="redshiftEndpoint" ng-model="jobToCreate.redshiftEndpoint" placeholder="cluster_name" required>
+            <span class="input-group-btn">
+              <button type="submit" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                <span class="glyphicon glyphicon-chevron-down"></span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                <li ng-repeat="cluster in clusterList | orderBy:'redshift_id'">
+                  <a ng-if="httpError">{{httpError}}</a>
+                  <a ng-if="!httpError" ng-click="updateJobRedshiftEndpoint(cluster)"><span class="font-thick">{{cluster.redshift_id}}</span> groups:({{cluster.group}})</a>
+                </li>
+                <li class="divider"></li>
+                <li><a href="#/datastores/register" target="_blank">Register new datastore</a></li>
+              </ul>
+            </span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label for="logName">Schema</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="logName" ng-model="jobToCreate.logName" placeholder="ranger" required />
+              <span class="input-group-btn">
+                <button type="submit" class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-click="getSchemaList()">
+                  <span class="glyphicon glyphicon-chevron-down"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                  <li ng-if="!schemaListError" ng-repeat="(schema, version) in schemaList | orderBy:'schema'">
+                    <a ng-click="updateJobLogName(schema)"><span class="font-thick">{{schema}}</span></a>
+                  </li>
+                </ul>
+              </span>
+            </div>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="schemaVersion">Schema version</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="schemaVersion" ng-model="jobToCreate.schemaVersion" placeholder="initial" required />
+              <span class="input-group-btn">
+                <button type="submit" class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-click="getSchemaList()">
+                  <span class="glyphicon glyphicon-chevron-down"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                  <li ng-if="!schemaListError" ng-repeat="version in schemaList[jobToCreate.logName] | orderBy:'version'">
+                    <a ng-click="updateJobSchemaVersion(version)"><span class="font-thick">{{version}}</span></a>
+                  </li>
+                </ul>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="s3Path">S3 path (Enter log name for instant search)</label>
+          <input type="text" autocomplete="off" typeahead="suggestion as suggestion.uri for suggestion in getSuggestionList($viewValue) | filter:$viewValue" typeahead-trigger class="form-control" id="s3Path" ng-model="jobToCreate.logMetaData" placeholder="s3://bucket_name/logs/log_name/" required />
+        </div>
+
+        <div class="row">
+          <div class="form-group col-md-6">
+            <!-- Label needs to go outside the input-group, because it messes up the alignment between the input text box and the calendar button otherwise -->
+            <label for="startDate">Start date</label>
+            <p class="input-group">
+              <input type="text" class="form-control" id="startDate" datepicker-popup="yyyy-MM-dd" ng-model="jobToCreate.startDate" is-open="startDateOpened" max-date="jobToCreate.endDate"  placeholder="{{today | date:'yyyy-MM-dd'}}" ng-click="openDatePicker($event, 'startDateOpened')" close-text="Close" required />
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="openDatePicker($event, 'startDateOpened')">
+                  <span class="glyphicon glyphicon-calendar"></span>
+                </button>
+              </span>
+            </p>
+          </div>
+
+          <div class="form-group col-md-6">
+            <!-- Label needs to go outside the input-group, because it messes up the alignment between the input text box and the calendar button otherwise -->
+            <label for="endDate">End date <small>(optional)</small></label>
+            <p class="input-group">
+              <input type="text" class="form-control" id="endDate" datepicker-popup="yyyy-MM-dd" ng-model="jobToCreate.endDate" is-open="endDateOpened" min-date="jobToCreate.startDate" ng-click="openDatePicker($event, 'endDateOpened')" close-text="Close" />
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="openDatePicker($event, 'endDateOpened')">
+                  <span class="glyphicon glyphicon-calendar"></span>
+                </button>
+              </span>
+            </p>
+            <p class="help-block bottom-ng-margin-small">Leave this field empty to have the Redshift cluster be updated daily after catching up from the start date</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="contactEmails">Contact Emails</label>
+          <input type="text" class="form-control" id="contactEmails" ng-model="jobToCreate.contactEmails" placeholder="email1@company.com, email2@company.com" required />
+          <p class="help-block">Comma-separated list of email addresses to associate with this job. These email addresses will be notified on completion or error.</p>
+        </div>
+
+        <!-- collapsable panel with a list of check boxes, to select which columns to display in the table -->
+        <accordion close-others="true">
+          <accordion-group is-open="columns.open">
+            <accordion-heading>
+              Additional Arguments (extra for experts)<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': columns.open, 'glyphicon-chevron-right': !columns.open}"></i>
+            </accordion-heading>
+            <div class="form-group">
+              <label for="additionalArguments">be sure to use valid JSON</label>
+              <input type="text" class="form-control" id="additionalArguments" ng-model="jobToCreate.additionalArguments" placeholder='{"step_name": ["--arg1", "--arg2"]}'/>
+            </div>
+          </accordion-group>
+        </accordion>
+        <button type="submit" class="btn btn-primary">Create Job</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Only show this info box after the user has validly filled out the form and selected a schema file -->
+  <div class="alert alert-info" role="alert" ng-show="jobCreateForm.$valid">
+    <span class="glyphicon glyphicon-info-sign"></span>
+      &nbsp; Please double-check all your details. Once a job is created, it can't be modified or canceled without admin support.
+  </div>
+
+  <!-- TODO: extract this as a directive -->
+  <div class="row" ng-show="jobCreatePromise">
+    <div class="col-lg-12">
+      <div class="progress">
+        <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Display the response -->
+  <div class="row" ng-show="jobCreateErrorResponse || jobCreateSuccessResponse">
+    <div class="col-lg-12">
+      <!-- TODO: this should probably be extracted as a directive -->
+      <div class="alert alert-danger" role="alert" ng-show="jobCreateErrorResponse">
+        <p>Failed to create job. Server response: </p>
+        <pre class="top-buffer-small">{{jobCreateErrorResponse}}</pre>
+      </div>
+      <div class="alert alert-success" role="alert" ng-show="jobCreateSuccessResponse">
+        <p>Job created! Server response:</p>
+        <pre class="top-buffer-small">{{jobCreateSuccessResponse}}</pre>
+      </div>
+    </div>
+  </div>
+</div>

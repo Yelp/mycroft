@@ -1,0 +1,5 @@
+config-env-docker.yaml
+*.pem
+mrjob.conf
+private.yaml
+session_file.txt

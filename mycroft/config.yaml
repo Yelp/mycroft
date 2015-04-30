@@ -1,0 +1,65 @@
+#
+# When deploying this service, don't modify this file directly, 
+# instead modify the environment specific config in the mycroft_config
+# directory in the root of the repo.
+# 
+
+aws_config:
+  scheduled_jobs_table: "Mycroft-ScheduledJobs"
+  etl_records_table: "Mycroft-ETLRecords"
+  redshift_clusters: "Mycroft-RedshiftClusters"
+  region: "us-west-2"
+
+use_instance_profile: false
+instance_profile_name: 'sherlock'
+instance_profile_creds_url: 'http://REPLACE_WITH_CREDS_URL/'
+instance_profile_creds_timeout_in_seconds: 4
+
+redshift_host:  "REDSHIFT_HOST.redshift.amazonaws.com"
+redshift_port:  5439
+redshift_region_uri: "redshift.us-west-2.amazonaws.com"
+redshift_cluster_subnet_group_name: "REDSHIFT_SUBNET_GROUP_NAME"
+security_group_id: "REDSHIFT_SECURITY_GROUP_ID"
+redshift_column_delimiter: '|' # '\x1e' for non-printable separators
+default_mycroft_redshift_host: 'REDSHIFT_HOST.us-west-2.redshift.amazonaws.com'
+default_mycroft_redshift_port: 5439
+
+run_local:
+    session_file: 'session_file.txt'
+    private: 'private.yaml'
+    logdir: 'logs'
+    mrjob_arg_template: "--runner=emr {0} --output-dir={1} --no-output --num-ec2-core-instances={2} --extractions {3} --column-delimiter={4} -c /etc/mrjob.minimal.conf -c sherlock/config/mrjob.conf"
+
+run_service:
+    mrjob_arg_template: "--runner=emr {0} --output-dir={1} --no-output --num-ec2-core-instances={2} --extractions {3} --column-delimiter={4} -c /etc/mrjob.minimal.conf -c sherlock/config/mrjob.conf"
+    private: "/replace/with/path/to/private.yaml"
+
+worker: &worker
+    num_et_processes_per_host: 8
+
+scanner: &scanner
+    et_timeout: 5
+    worker_keepalive_sec: 300   # consider worker dead if no keepalive
+
+sqs: &sqs
+    region: us-west-2  # TODO: unify this with the aws.* config key
+    max_messages_per_fetch: 1
+    wait_time_seconds: 20
+    et_scanner_queue_name: ETScannerQueue
+    load_scanner_queue_name: LoadScannerQueue
+    et_queue_name: Mycroft-ETQueueV1
+    load_queue_name: Mycroft-LoadQueueV1
+
+log_stream_name: mycroft_dev  # TODO: see if we need to split sherlock logs
+
+max_error_retries: 16           # with exponential backoff all retries end after 1 day
+s3_log_prefix: 'mycroft/stream'
+s3_bucket: 'REPLACE_WITH_S3_BUCKET'
+s3_schema_location_format: 's3://REPLACE_WITH_S3_BUCKET/mycroft/stream/{0}/schema/{1}/schema.yaml'
+s3_mrjob_output_path_format: 's3://REPLACE_WITH_S3_BUCKET/mycroft/scratch/{0}/{1}/{2}'
+
+default_mrjob: 'sherlock.batch.mr_json.mrjob_create'
+
+disable_logfinder_service: true
+log_finder_search_end_point: 
+log_finder_buckets_end_point: 

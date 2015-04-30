@@ -1,0 +1,60 @@
+swaggerVersion: '1.2'
+apiVersion: '0.1'
+consumes: [application/json]
+produces: [application/json]
+basePath: /
+apis:
+  - path: /v1/runs/{job_id}
+    operations:
+      - type: array
+        method: GET
+        items: {"$ref": "Run"}
+        nickname: read_runs_job_id
+        summary: read all runs for a particular job_id from the backing store
+        parameters:
+          - name: job_id
+            paramType: path
+            type: string
+            required: true
+        responseMessages:
+          - code: 404
+            message: invalid job_id
+          - code: 500
+            message: unknown exception
+models:
+  Run:
+    id: Run
+    required:
+      - hash_key
+      - etl_status
+      - updated_at
+      - data_date
+      - s3_path
+      - et_starttime
+      - et_runtime
+      - load_starttime
+      - load_runtime
+      - redshift_id
+      - run_by
+      - job_id
+      - etl_error
+      - additional_arguments
+    properties:
+      hash_key: {type: string}
+      etl_status: {type: string}
+      updated_at: {type: string}
+      data_date:
+        type: string
+        description: format YYYY-mm-dd
+      s3_path:
+        type: string
+        description: e.g., s3://bucket/key
+      et_starttime: {type: string}
+      et_runtime: {type: int}
+      load_starttime: {type: string}
+      load_runtime: {type: int}
+      redshift_id: {type: int}
+      run_by: {type: string}
+      job_id: {type: string}
+      etl_error: {type: string}
+      additional_arguments: {type: string}

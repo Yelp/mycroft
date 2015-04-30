@@ -1,0 +1,61 @@
+<div class="container">
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      Register new datastore
+    </div>
+
+    <div class="panel-body">
+      <form role="form" ng-submit="createDatastore(datastoreToCreate)" name="jobCreateForm">
+        <div class="row">
+          <div class="form-group col-md-4">
+            <label for="datastoreName">Name</label>
+            <input type="text" class="form-control " id="datastoreName" ng-model="datastoreToCreate.datastoreName" placeholder="" required>
+          </div>
+
+          <div class="form-group col-md-12">
+            <label for="datastoreEndpoint">Endpoint</label>
+            <input type="text" class="form-control " id="datastoreEndpoint" ng-model="datastoreToCreate.datastoreEndpoint" placeholder="" required>
+          </div>
+
+          <div class="form-group col-md-1">
+            <label for="datastorePort">Port</label>
+            <input type="text" class="form-control " id="datastorePort" ng-model="datastoreToCreate.datastorePort" placeholder="5439" required>
+          </div>
+
+          <div class="form-group col-md-4">
+            <label for="datastoreSchema">Namespace (optional -- case insensitive)</label>
+            <input type="text" class="form-control " id="datastoreSchema" ng-model="datastoreToCreate.datastoreSchema" placeholder="public" required>
+          </div>
+
+        </div>
+
+        <button type="submit" class="btn btn-primary">Register Datastore</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TODO: extract this as a directive -->
+  <div class="row" ng-show="datastoreCreatePromise">
+    <div class="col-lg-12">
+      <div class="progress">
+        <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Display the response -->
+  <div class="row" ng-show="datastoreCreateErrorResponse || datastoreCreateSuccessResponse">
+    <div class="col-lg-12">
+      <!-- TODO: this should probably be extracted as a directive -->
+      <div class="alert alert-danger" role="alert" ng-show="datastoreCreateErrorResponse">
+        <p>Failed to register datastore. Server response: </p>
+        <pre class="top-buffer-small">{{datastoreCreateErrorResponse}}</pre>
+      </div>
+      <div class="alert alert-success" role="alert" ng-show="datastoreCreateSuccessResponse">
+        <p>Datastore registered! Server response:</p>
+        <pre class="top-buffer-small">{{datastoreCreateSuccessResponse}}</pre>
+      </div>
+    </div>
+  </div>
+
+</div>

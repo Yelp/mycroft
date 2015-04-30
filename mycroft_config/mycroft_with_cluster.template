@@ -1,0 +1,327 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Mycroft log data warehouse",
+  "Parameters": {
+    "VpcId": {
+      "Type": "String",
+      "Description": "VpcId of your existing Virtual Private Cloud (VPC)"
+    }
+  },
+  "Resources": {
+    "DeadLetterQueueV1": {
+      "Properties": {},
+      "Type": "AWS::SQS::Queue"
+    },
+    "ETLRecords": {
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "hash_key",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "data_date",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "job_id",
+            "AttributeType": "S"
+          }
+        ],
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "ETLRecordByJobIdAndDataDate",
+            "KeySchema": [
+              {
+                "AttributeName": "job_id",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "data_date",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            },
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": "1",
+              "WriteCapacityUnits": "1"
+            }
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "hash_key",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "data_date",
+            "KeyType": "RANGE"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "1",
+          "WriteCapacityUnits": "1"
+        }
+      },
+      "Type": "AWS::DynamoDB::Table"
+    },
+    "ETQueueV1": {
+      "Properties": {
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "DeadLetterQueueV1",
+              "Arn"
+            ]
+          },
+          "maxReceiveCount": 1
+        },
+        "VisibilityTimeout": 14400
+      },
+      "Type": "AWS::SQS::Queue"
+    },
+    "ETScannerQueueV1": {
+      "Properties": {
+        "VisibilityTimeout": 14400
+      },
+      "Type": "AWS::SQS::Queue"
+    },
+    "RedshiftClusters": {
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "redshift_id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "redshift_id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "1",
+          "WriteCapacityUnits": "1"
+        }
+      },
+      "Type": "AWS::DynamoDB::Table"
+    },
+    "ScheduledJobs": {
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "hash_key",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "et_status",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "load_status",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "log_schema_version",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "log_name",
+            "AttributeType": "S"
+          }
+        ],
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "ETStatusIndex",
+            "KeySchema": [
+              {
+                "AttributeName": "et_status",
+                "KeyType": "HASH"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            },
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": "1",
+              "WriteCapacityUnits": "1"
+            }
+          },
+          {
+            "IndexName": "LoadStatusIndex",
+            "KeySchema": [
+              {
+                "AttributeName": "load_status",
+                "KeyType": "HASH"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            },
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": "1",
+              "WriteCapacityUnits": "1"
+            }
+          },
+          {
+            "IndexName": "LogNameLogSchemaVersionIndex",
+            "KeySchema": [
+              {
+                "AttributeName": "log_name",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "log_schema_version",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            },
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": "1",
+              "WriteCapacityUnits": "1"
+            }
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "hash_key",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "1",
+          "WriteCapacityUnits": "1"
+        }
+      },
+      "Type": "AWS::DynamoDB::Table"
+    },
+    "MycroftRedshiftCluster": {
+      "Type": "AWS::Redshift::Cluster",
+      "Properties": {
+        "ClusterType": "single-node",
+        "VpcSecurityGroupIds": [{"Ref": "RedshiftClusterSecurityGroup"}],
+        "NodeType": "dw2.large",
+        "DBName": "dev"
+      }
+    },
+    "RedshiftClusterSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription" : "Allow access to Redshift cluster",
+        "SecurityGroupIngress": [{
+          "IpProtocol": "tcp",
+          "FromPort": "5439",
+          "ToPort": "5439",
+          "CidrIp": "0.0.0.0/0"
+        }],
+        "VpcId": {"Ref": "VpcId"}
+      }
+    },
+    "MycroftS3Bucket": {
+      "Type": "AWS::S3::Bucket"
+    },
+    "MycroftEMRRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2008-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [ "elasticmapreduce.amazonaws.com" ]
+            },
+            "Action": [ "sts:AssumeRole" ]
+          }]
+        },
+        "Path": "/",
+        "Policies": [{
+          "PolicyName": "MycroftEMRPolicy",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "ec2:AuthorizeSecurityGroupIngress",
+                  "ec2:CancelSpotInstanceRequests",
+                  "ec2:CreateSecurityGroup",
+                  "ec2:CreateTags",
+                  "ec2:Describe*",
+                  "ec2:DeleteTags",
+                  "ec2:ModifyImageAttribute",
+                  "ec2:ModifyInstanceAttribute",
+                  "ec2:RequestSpotInstances",
+                  "ec2:RunInstances",
+                  "ec2:TerminateInstances",
+                  "iam:PassRole",
+                  "iam:ListRolePolicies",
+                  "iam:GetRole",
+                  "iam:GetRolePolicy",
+                  "iam:ListInstanceProfiles",
+                  "s3:Get*",
+                  "s3:List*",
+                  "s3:CreateBucket",
+                  "sdb:BatchPutAttributes",
+                  "sdb:Select"
+                ],
+                "Resource": "*",
+                "Effect": "Allow"
+              }
+            ]
+          }
+        }]
+      }
+    },
+    "MycroftEMREC2Role": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2008-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [ "ec2.amazonaws.com" ]
+            },
+            "Action": [ "sts:AssumeRole" ]
+          }]
+        },
+        "Path": "/",
+        "Policies": [{
+          "PolicyName": "MycroftEMREC2Policy",
+          "PolicyDocument": {
+            "Statement": [
+              {
+                "Action": [
+                  "cloudwatch:*",
+                  "dynamodb:*",
+                  "ec2:Describe*",
+                  "elasticmapreduce:Describe*",
+                  "rds:Describe*",
+                  "s3:*",
+                  "sdb:*",
+                  "sns:*",
+                  "sqs:*"
+                ],
+                "Resource": "*",
+                "Effect": "Allow"
+              }
+            ]
+          }
+        }]
+      }
+    },
+    "MycroftEMREC2InstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [{
+          "Ref": "MycroftEMREC2Role"
+        }]
+      }
+    }
+  }
+}

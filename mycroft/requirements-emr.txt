@@ -1,0 +1,7 @@
+argparse==1.2.1
+simplejson==3.6.4
+mr3po==0.1.0
+httplib2==0.9
+PyYAML==3.10
+PyStaticConfiguration==0.7.0
+mrjob==0.4.3

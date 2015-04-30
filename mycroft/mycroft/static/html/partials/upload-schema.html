@@ -1,0 +1,79 @@
+<div class="container">
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            Upload schema file
+        </div>
+
+        <div class="panel-body">
+            <!-- TODO(amaijazi): We might want to add better validation, e.g., on length and allowable characters -->
+            <!-- http://scotch.io/tutorials/javascript/angularjs-form-validation seems like a good reference for this -->
+            <form role="form" ng-submit="uploadSchema(schemaToUpload)" name="uploadForm">
+
+                <div class="row">
+                  <div class="form-group col-md-6">
+                    <label for="logName">Log name</label>
+                    <input type="text" class="form-control" id="logName" ng-model="schemaToUpload.logName" placeholder="ranger" required />
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="schemaVersion">Schema version</label>
+                    <input type="text" class="form-control" id="schemaVersion" ng-model="schemaToUpload.version" placeholder="v1" required />
+                  </div>
+                </div>
+
+                    <div class="form-group col-md-11">
+                        <label for="schemaFile">Schema file</label>
+                        <input type="file" id="schemaFile" filestore="schemaToUpload.content" accept=".yml, .yaml" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary top-buffer-md">Upload schema</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Only show this info box after the user has validly filled out the form and selected a schema file -->
+    <div class="alert alert-info" role="alert" ng-show="uploadForm.$valid && schemaToUpload.content">
+        <span class="glyphicon glyphicon-info-sign"></span>
+          &nbsp; Please double-check all your schema details. Once a schema is uploaded, it can't be modified or deleted without admin support.
+    </div>
+
+    <!-- TODO: extract this as a directive -->
+    <div class="row" ng-show="schemaUploadPromise">
+        <div class="col-lg-12">
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 100%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display the response -->
+    <div class="row" ng-show="schemaUploadErrorResponse || schemaUploadSuccessResponse">
+        <div class="col-lg-12">
+            <!-- TODO: this should probably be extracted as a directive -->
+            <div class="alert alert-danger" role="alert" ng-show="schemaUploadErrorResponse">
+                <p>Failed to upload schema - maybe the log name and version
+                    <a ng-href="{{getFilteredSchemaViewLink(schemaToUpload)}}" class="alert-link">already exists?</a> Server response:
+                </p>
+                <pre class="top-buffer-small">{{schemaUploadErrorResponse}}</pre>
+            </div>
+            <div class="alert alert-success" role="alert" ng-show="schemaUploadSuccessResponse">
+                <p><a ng-href="{{getFilteredSchemaViewLink(schemaToUpload)}}" class="alert-link">Schema uploaded!</a> Server response:</p>
+                <pre class="top-buffer-small">{{schemaUploadSuccessResponse}}</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schema file preview area -->
+    <div class="panel panel-primary top-buffer">
+        <div class="panel-heading">
+            Schema file preview
+        </div>
+        <div class="panel-body">
+            <div class="well" ng-hide="schemaToUpload.content">
+                <span class="glyphicon glyphicon-folder-open"></span>
+                &nbsp;&nbsp;Select a schema file to see a preview
+            </div>
+            <pre ng-show="schemaToUpload.content">{{schemaToUpload.content}}</pre>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,10 @@
+tables:
+  table_3:
+    columns:
+    - is_mandatory: true
+      log_key: id
+      sql_attr: int8 not null
+    sortkey_attr: []
+    src: ''
+    src_type: dict
+version: 1

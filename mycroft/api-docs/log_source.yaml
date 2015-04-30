@@ -1,0 +1,31 @@
+swaggerVersion: '1.2'
+apiVersion: '0.1'
+consumes: [application/json]
+produces: [application/json]
+basePath: /
+apis:
+  - path: /v1/log_source/search
+    operations:
+      - type: array
+        method: POST
+        items: {"$ref": "Source_log"}
+        nickname: log_source_search
+        summary: search all logs beginning with keyword
+        parameters:
+          - name: search
+            paramType: body
+            type: Source_log
+            required: true
+        responseMessages:
+          - code: 404
+            message: invalid values
+          - code: 500
+            message: unknown exception
+models:
+  Source_log:
+    id: Source_log
+    required:
+      - keyword
+    properties:
+      keyword: {type: string}
+      limit: {type: int}

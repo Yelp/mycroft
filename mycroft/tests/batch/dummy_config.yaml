@@ -1,0 +1,5 @@
+redshift_host: 'host'
+redshift_port: 1234
+run_local:
+    session_file: 'tests/example.creds'
+    logdir: 'tests/batch'

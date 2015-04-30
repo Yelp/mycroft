@@ -1,0 +1,171 @@
+swaggerVersion: '1.2'
+apiVersion: '0.1'
+consumes: [application/json]
+produces: [application/json]
+basePath: /
+apis:
+  - path: /v1/jobs/filtered/{log_name}/{log_schema_version}
+    operations:
+      - type: array
+        method: GET
+        items: {"$ref": "Job"}
+        nickname: read_jobs_log_version
+        summary: read all jobs for a particular log & version from the backing store
+        parameters:
+          - name: log_name
+            paramType: path
+            type: string
+            required: true
+          - name: log_schema_version
+            paramType: path
+            type: string
+            required: true
+        responseMessages:
+          - code: 404
+            message: invalid log_name or log_version
+          - code: 500
+            message: unknown exception
+  - path: /v1/jobs/filtered/{log_name}
+    operations:
+      - type: array
+        method: GET
+        items: {"$ref": "Job"}
+        nickname: read_jobs_log
+        summary: read all jobs for a particular log from the backing store
+        parameters:
+          - name: log_name
+            paramType: path
+            type: string
+            required: true
+        responseMessages:
+          - code: 404
+            message: invalid log_name
+          - code: 500
+            message: unknown exception
+  - path: /v1/jobs
+    operations:
+      - type: array
+        method: GET
+        items: {"$ref": "Job"}
+        nickname: read_jobs
+        summary: read all jobs from the backing store
+        responseMessages:
+          - code: 500
+            message: unknown exception
+      - type: boolean
+        method: POST
+        items: {"$ref": "JobInput"}
+        nickname: create_job
+        summary: creates a job
+        parameters:
+          - name: body
+            paramType: body
+            type: Job
+            required: true
+        responseMessages:
+          - code: 404
+            message: invalid job parameters
+          - code: 500
+            message: unknown exception
+          - code: 502
+            message: post failed due to dynamo connection issue
+  - path: /v1/jobs/job
+    operations:
+      - type: boolean
+        method: PUT
+        items: {"$ref": "JobUpdate"}
+        nickname: update_job
+        summary: update a job
+        parameters:
+          - name: body
+            paramType: body
+            type: JobUpdate
+            required: true
+        responseMessages:
+          - code: 404
+            message: invalid job parameters
+          - code: 500
+            message: unknown exception
+          - code: 502
+            message: put failed due to dynamo connection issue
+models:
+  Job:
+    id: Job
+    required:
+      - log_name
+      - log_schema_version
+      - s3_path
+      - start_date
+      - redshift_id
+      - contact_emails
+      - et_status
+      - load_status
+    properties:
+      log_name: {type: string}
+      log_schema_version: {type: string}
+      s3_path:
+        type: string
+        description: e.g., s3://bucket/key
+      start_date:
+        type: string
+        description: format YYYY-mm-dd
+      end_date:
+        type: string
+        description: format YYYY-mm-dd
+      contact_emails:
+        type: array
+        items: {type: string}
+      redshift_id: {type: string}
+      uuid: {type: string}
+      et_status: {type: string}
+      load_status: {type: string}
+      cancel_requested: {type: boolean}
+      pause_requested: {type: boolean}
+      addtional_arugments: {type: string}
+  JobInput:
+    id: JobInput
+    required:
+      - log_name
+      - log_schema_version
+      - s3_path
+      - start_date
+      - redshift_id
+      - contact_emails
+    properties:
+      log_name: {type: string}
+      log_schema_version: {type: string}
+      s3_path:
+        type: string
+        description: e.g., s3://bucket/key
+      start_date:
+        type: string
+        description: format YYYY-mm-dd
+      end_date:
+        type: string
+        description: format YYYY-mm-dd
+      contact_emails:
+        type: array
+        items: {type: string}
+      redshift_id: {type: string}
+      addtional_arugments: {type: string}
+  JobUpdate:
+    id: JobUpdate
+    required:
+      - log_name
+      - log_schema_version
+      - start_date
+      - redshift_id
+    properties:
+      log_name: {type: string}
+      log_schema_version: {type: string}
+      start_date:
+        type: string
+        description: format YYYY-mm-dd
+      end_date:
+        type: string
+        description: format YYYY-mm-dd
+      redshift_id: {type: string}
+      et_status: {type: string}
+      load_status: {type: string}
+      cancel_requested: {type: boolean}
+      pause_requested: {type: boolean}

@@ -1,0 +1,35 @@
+#/usr/bin/env python
+
+import os
+
+SERVICE = os.environ.get('SERVICE') or 'mycroft'
+NUM_WORKERS = os.environ.get('NUM_WORKERS') or 4
+PORT = os.environ.get('PORT') or 13819
+STATS_PORT = os.environ.get('STATS_PORT') or 13820
+
+if __name__ == "__main__":
+    cwd = os.getcwd()
+    uwsgi_cmd = "/usr/local/bin/uwsgi"
+    args = [
+        '--honour-stdin',
+        '--master',
+        '--processes', '2',
+        '--auto-procname',
+        '--procname-prefix-spaced', "{0}".format( SERVICE),
+        '--wsgi-file', "{0}.wsgi".format(SERVICE),
+        '--callable=application',
+        '--need-app',
+        '--buffer-size', '65535',
+        '--chdir', "{0}".format(cwd),
+        '--binary-path', uwsgi_cmd,
+        '--mule',
+        '--http', ":{0}".format(PORT),
+        '--stats', ":{0}".format(STATS_PORT)
+    ]
+    env = dict({
+        'MYCROFTCODE': "{0}".format(cwd),
+        'SERVICE_CONFIG_PATH': "{0}/config.yaml".format(cwd),
+        'SERVICE_ENV_CONFIG_PATH': "/mycroft_config/config-env-docker.yaml".format(cwd)
+    })
+
+    os.execve(uwsgi_cmd, args, env)

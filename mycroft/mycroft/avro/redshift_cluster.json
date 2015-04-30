@@ -1,0 +1,34 @@
+{"namespace": "mycroft.models",
+ "type": "record",
+ "name": "RedshiftCluster",
+ "doc": "Describes a redshift cluster",
+ "fields": [
+     {"name": "redshift_id",
+      "type": "string",
+      "doc": "the id of the redshift cluster"},
+     {"name": "port",
+      "type": "int",
+      "doc": "the port for the redshift cluster"},
+     {"name": "host",
+      "type": "string",
+      "doc": "the hostname of the redshift cluster"},
+     {"name": "node_type",
+      "type": "string",
+      "doc": "the cluster type e.g., dw1.xlarge"},
+     {"name": "node_count",
+      "type": "int",
+      "doc": "the number of nodes in the cluster"},
+     {"name": "db_schema",
+      "type": "string",
+      "doc": "schema of the Redshift cluster, see http://docs.aws.amazon.com/redshift/latest/dg/r_Schemas_and_tables.html"},
+     {"name": "groups",
+      "type": {
+          "type": "array",
+          "items": "string"
+      },
+      "doc": "array of groupnames having permissions on the cluster."},
+     {"name": "status",
+      "type": "string",
+      "doc": "the status of the cluster (e.g., 'available'"}
+ ]
+}

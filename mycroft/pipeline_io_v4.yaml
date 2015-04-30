@@ -1,0 +1,15 @@
+pipeline:
+    s3_output_prefix: 's3://bucket/key/scratch/{logname}/v4/some_log'
+    yaml_schema_file: 'schema/some_db.yaml'
+    redshift_database: 'dev'
+    et_step:
+      s3_prefixes:
+        - 's3://bucket/logs/some_log/'
+      s3_input_suffix: '/part-*.gz'
+      s3_to_s3_stream: 'mrjob_stream_name'
+      mrjob: 'sherlock.batch.mr_json.mrjob_create'
+      cores: 10
+    load_step:
+      s3_to_redshift_stream: 'redshift_stream_name'
+      copy_time_est_secs: 3000
+      days_to_check: 5

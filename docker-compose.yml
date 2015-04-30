@@ -1,0 +1,14 @@
+mycroftapi:
+  image: mycroft
+  command: python serviceinit.d/mycroft start-dev
+  ports:
+  - "11476:13819"
+  - "11477:13820"
+#  volumes:
+#    - mycroft/mycroft/config.py:/mycroft/mycroft/config.py
+mycroftscanner:
+  image: mycroft
+  command: python mycroft/backend/scanners/et_scanner.py -r --config config.yaml --config-override /mycroft_config/config-env-docker.yaml
+mycroftworker:
+  image: mycroft
+  command:  python mycroft/backend/worker/et_worker.py -r --config config.yaml --config-override /mycroft_config/config-env-docker.yaml

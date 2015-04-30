@@ -1,0 +1,22 @@
+{"namespace": "mycroft.models",
+ "type": "record",
+ "name": "ETLSchema",
+ "doc": "Describe a schema used to perform ETL from logs to Redshift",
+ "fields": [
+     {"name": "checksum",
+      "type": "string",
+      "doc": "MD5 checksum of the schema"},
+     {"name": "name",
+      "type": "string",
+      "doc": "name of the schema (without version)"},
+     {"name": "version",
+      "type": "string",
+      "doc": "free form version string"},
+     {"name": "s3_path",
+      "type": "string",
+      "doc": "s3 path in the format: s3://bucket/path"},
+     {"name": "owner",
+      "type": "string",
+      "doc": "Owner of the schema. Recommend to use team email alias"}
+ ]
+}

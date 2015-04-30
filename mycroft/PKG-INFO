@@ -1,0 +1,8 @@
+Metadata-Version: 1.0
+Name: mycroft
+Version: 0.1.0
+Summary: Pipeline for ingesting logs into Redshift
+Home-page: https://github.com/Yelp/mycroft
+Author: Yelp, Inc
+Author-email: bam@yelp.com
+License: MIT (c) YELP 2015

@@ -1,0 +1,5 @@
+tables:
+  'aaaa' : stuff
+  'cccc' : more_stuff
+  'bbbb' : even_more_stuff
+version: 2

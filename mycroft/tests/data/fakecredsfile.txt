@@ -1,0 +1,1 @@
+{"AccessKeyId": "FakeAccessKey", "SecretAccessKey": "SuperSecretKey"}

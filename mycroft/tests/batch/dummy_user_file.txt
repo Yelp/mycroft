@@ -1,0 +1,3 @@
+---
+redshift_user: test
+redshift_password: password

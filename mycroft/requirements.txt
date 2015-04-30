@@ -1,0 +1,41 @@
+# The contents of this example requirements.txt were generated for you
+# in the service template.
+
+cython==0.22
+MySQL-python==1.2.5
+PasteDeploy==1.5.0
+SQLAlchemy==0.8.2
+thriftpy==0.2.0
+WebOb==1.4
+jsonschema==2.2.0
+pyramid==1.5
+pyramid-swagger==1.1.0
+#pyramid_uwsgi_metrics==0.3.0
+python-snappy==0.5
+repoze.lru==0.6
+requests==2.2.1
+#scribe==2.0.post1
+tornado==2.4.1
+translationstring==1.1
+# treap==1.31
+uWSGI==2.0.6
+venusian==1.0a8
+zope.deprecation==4.0.2
+zope.interface==4.0.5
+avro==1.7.6
+boto==2.34.0
+psycopg2==2.5.1
+python-dateutil==2.2
+
+# includes for EMR and custom packages
+-r requirements-custom.txt
+-r requirements-emr.txt
+
+# Packages here are implicit dependencies - they aren't used directly by this
+# service, but rather by packages used by this service. To update this list,
+# first comment out this file's inclusion in requirements.txt, then recreate a
+# virtualenv and run "pip freeze -l" to see what is being sucked in. Make sure
+# to test that the service still works with the updated dependencies.
+
+six==1.8.0
+uwsgi-metrics==1.1.5

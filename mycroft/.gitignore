@@ -1,0 +1,5 @@
+aws
+src
+mycroft.egg-info
+.coverage
+.tox

@@ -1,0 +1,18 @@
+module_env_config: []
+
+sqs: &sqs
+    region: us-west-2  # TODO: unify this with the aws.* config key
+    max_messages_per_fetch: 1
+    wait_time_seconds: 20
+    et_scanner_queue_name: Mycroft-ETScannerQueueV1
+    et_queue_name: Mycroft-ETQueueV1
+
+aws_config:
+  scheduled_jobs_table: Mycroft-ScheduledJobs
+  etl_records_table: Mycroft-ETLRecords
+  redshift_clusters: Mycroft--RedshiftClusters
+  region: "us-west-2"
+
+run_local:
+  private: ../mycroft_config/private.yaml
+  session_file: /mycroft_config/session_file.txt

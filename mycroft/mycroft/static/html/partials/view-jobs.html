@@ -1,0 +1,228 @@
+<div class="container">
+  <!-- Search box -->
+  <div class="panel panel-primary" ng-if="!showJobDetails">
+    <div class="panel-heading">
+      Search (use comma for multiple values)
+    </div>
+    <div class="panel-body">
+      <form class="form-inline" role="form">
+        <div class="form-group col-md-4">
+          <label for="logName">Log name</label>
+          <input type="text" class="form-control" id="logName" ng-model="jobFilter.logName" placeholder="ranger" ng-list/>
+        </div>
+        <div class="form-group col-md-4">
+          <label for="jobSchemaVersion">Schema version</label>
+          <input type="text" class="form-control" id="jobSchemaVersion" ng-model="jobFilter.schemaVersion" placeholder="v1" ng-list/>
+        </div>
+        <div class="form-group col-md-4">
+          <label for="status">Status</label>
+          <input type="text" class="form-control" id="et_status" ng-model="jobFilter.et_status" placeholder="running" ng-list/>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Collapsable panel with a list of check boxes, to select which columns to display in the table -->
+  <accordion close-others="true">
+    <accordion-group is-open="columns.open">
+      <accordion-heading>
+        Columns to display <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': columns.open, 'glyphicon-chevron-right': !columns.open}"></i>
+      </accordion-heading>
+      <div class="checkbox col-md-1 top-ng-margin-small">
+        <label>
+          <input type="checkbox" ng-model="columns.logName"> Log name
+        </label>
+      </div>
+      <div class="checkbox col-md-2">
+        <label>
+          <input type="checkbox" ng-model="columns.schemaVersion"> Schema version
+        </label>
+      </div>
+      <div class="checkbox col-md-1">
+        <label>
+          <input type="checkbox" ng-model="columns.s3Path"> S3 path
+        </label>
+      </div>
+      <div class="checkbox col-md-2">
+        <label>
+          <input type="checkbox" ng-model="columns.contactEmails"> Contact emails
+        </label>
+      </div>
+      <div class="checkbox col-md-1">
+        <label>
+          <input type="checkbox" ng-model="columns.uuid"> UUID
+        </label>
+      </div>
+      <div class="checkbox col-md-2">
+        <label>
+          <input type="checkbox" ng-model="columns.redshiftEndpoint"> Redshift endpoint
+        </label>
+      </div>
+      <div class="checkbox col-md-1">
+        <label>
+          <input type="checkbox" ng-model="columns.startDate"> Start date
+        </label>
+      </div>
+      <div class="checkbox col-md-1">
+        <label>
+          <input type="checkbox" ng-model="columns.endDate"> End date
+        </label>
+      </div>
+      <div class="checkbox col-md-1">
+        <label>
+          <input type="checkbox" ng-model="columns.status"> Run status
+        </label>
+      </div>
+    </accordion-group>
+  </accordion>
+
+  <!-- Loading bar, so that the UI doesn't look frozen when we're getting a list of jobs. -->
+  <!-- The loading bar should disappear when the job end-point returns. -->
+  <div class="row" ng-show="listJobsPromise">
+    <div class="col-md-12">
+      <div class="progress">
+        <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Area to display errors, if there are any, when getting a list of jobs -->
+  <div class="row" ng-show="listJobsError">
+    <div class="col-md-12">
+      <div class="alert alert-danger" role="alert">Jobs failed to load: <pre>{{listJobsError}}</pre></div>
+    </div>
+  </div>
+
+  <!-- If the list of jobs successfuly loaded, display them as a table -->
+  <table class="table table-striped table-hover table-bordered" ng-hide="listJobsPromise || listJobsError">
+    <caption class="text-left" ng-if="showJobDetails"><h4>Job summary</h4></caption>
+    <thead>
+    <tr>
+      <th ng-show="columns.logName" ng-click="changeSorting(sortJobKeys, ['logName', 'schemaVersion'])">Log name</th>
+      <th ng-show="columns.schemaVersion" ng-click="changeSorting(sortJobKeys, ['schemaVersion', 'logName'])">Schema version</th>
+      <th ng-show="columns.s3Path" ng-click="changeSorting(sortJobKeys, ['s3Path'])">S3 Path</th>
+      <th ng-show="columns.contactEmails" ng-click="changeSorting(sortJobKeys, ['contactEmails'])">Contact emails</th>
+      <th ng-show="columns.uuid" ng-click="changeSorting(sortJobKeys, ['uuid'])">UUID</th>
+      <th ng-show="columns.redshiftEndpoint" ng-click="changeSorting(sortJobKeys, ['redshiftEndpoint'])">Redshift ID</th>
+      <th ng-show="columns.startDate" ng-click="changeSorting(sortJobKeys, ['startDate'])">Start date</th>
+      <th ng-show="columns.endDate" ng-click="changeSorting(sortJobKeys, ['endDate'])">End date</th>
+      <th ng-show="columns.status" ng-click="changeSorting(sortJobKeys, ['status'])">Status</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody ng-repeat="job in parsedJobs | filterMultiple:jobFilter | orderBy:sortJobKeys.column:sortJobKeys.descending">
+    <tr>
+      <td ng-show="columns.logName">{{job.logName}}</td>
+      <td ng-show="columns.schemaVersion">{{job.schemaVersion}}</td>
+      <td ng-show="columns.s3Path">{{job.s3Path}}</td>
+      <td ng-show="columns.contactEmails" class="wrap-words">{{job.contactEmails}}</td>
+      <td ng-show="columns.uuid">{{job.uuid}}</td>
+      <td ng-show="columns.redshiftEndpoint" class="wrap-words">{{job.redshiftEndpoint}}</td>
+      <!-- The way that date are formatted, they will normally line-wrap on the hyphens.
+      However, we don't especially want them to line-wrap, and would instead prefer that a
+      different column wrap instead.-->
+      <td ng-show="columns.startDate"><nobr>{{job.startDate}}</nobr></td>
+      <td ng-show="columns.endDate"><nobr>{{job.endDate}}</nobr></td>
+      <td ng-show="columns.status">
+        <a type="" ng-href="#/jobs/view?uuid={{job.uuid}}&jobDetails=true" ng-if="!showJobDetails">{{job.status}}</a>
+        <p ng-if="showJobDetails">{{job.status}}</p>
+      </td>
+      <td>
+        <div class="btn-group" >
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal" ng-click="initCancelRequest(job)" ng-disabled="disableCancelButton(job)" ng-if="!job.showDelete">
+            Cancel
+          </button>
+          <!-- Modal -->
+          <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" ng-if="!job.showDelete">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5>Are you sure you want to cancel the job below?</h5>
+                </div>
+                <div class="modal-body">
+                  Log name: {{cancelJob.logName}}<br>
+                  Schema version: {{cancelJob.schemaVersion}}<br>
+                  Redshift ID: {{cancelJob.redshiftEndpoint}}<br>
+                  Start date: {{cancelJob.startDate}}<br>
+                  End date: {{cancelJob.endDate}}<br>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                  <button type="submit" class="btn btn-primary" ng-click="execCancelRequest()" data-dismiss="modal">Yes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myDeleteModal" ng-click="initDeleteRequest(job)" ng-disabled="disableDeleteButton(job)" ng-if="job.showDelete">
+            Delete
+          </button>
+          <!-- Modal -->
+          <div class="modal fade" id="myDeleteModal" tabindex="-1" role="dialog" aria-labelledby="myDeleteModalLabel" aria-hidden="true" ng-if="job.showDelete">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5>Are you sure you want to delete the job below?</h5>
+                </div>
+                <div class="modal-body">
+                  Log name: {{deleteJob.logName}}<br>
+                  Schema version: {{deleteJob.schemaVersion}}<br>
+                  Redshift ID: {{deleteJob.redshiftEndpoint}}<br>
+                  Start date: {{deleteJob.startDate}}<br>
+                  End date: {{deleteJob.endDate}}<br>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                  <button type="submit" class="btn btn-primary" ng-click="execDeleteRequest()" data-dismiss="modal">Yes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-default dropdown-toggle"
+                  data-toggle="dropdown">
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li ng-class="job.pauseLinkEnable" class=""><a href="" ng-click="execPauseRequest(job)">Pause</a></li>
+            <li ng-class="job.resumeLinkEnable" class=""><a ng-click="execResumeRequest(job)">Resume</a></li>
+          </ul>
+        </div>
+       </td>
+    </tr>
+    </tbody>
+  </table>
+
+
+  <table class="table table-striped table-hover table-bordered" ng-if="showJobDetails">
+    <caption class="text-left"><h4>Job details</h4></caption>
+    <thead>
+    <tr>
+      <th ng-click="changeSorting(sortRunKeys, ['data_date'])">Date</th>
+      <th ng-click="changeSorting(sortRunKeys, ['run_by'])">Worker</th>
+      <th ng-click="changeSorting(sortRunKeys, ['etl_status'])">ETL status</th>
+      <th ng-click="changeSorting(sortRunKeys, ['updated_at'])">Last update time (Local Time)</th>
+      <th ng-click="changeSorting(sortRunKeys, ['et_starttime'])">ET start time (Local Time)</th>
+      <th ng-click="changeSorting(sortRunKeys, ['et_runtime'])">ET runtime (Sec)</th>
+      <th ng-click="changeSorting(sortRunKeys, ['load_starttime'])">Load start time (Local Time)</th>
+      <th ng-click="changeSorting(sortRunKeys, ['load_runtime'])">Load runtime (Sec)</th>
+      <th ng-click="changeSorting(sortRunKeys, ['etl_error'])">ETL error</th>
+    </tr>
+    </thead>
+    <tbody ng-repeat="run in runs | orderBy:sortRunKeys.column:sortRunKeys.descending" data-ng-switch on="run.isRowCollapsed">
+      <tr ng-class="getRunsResultClass(run)" ng-click="selectRow(run)">
+        <td>{{run.data_date}}</td>
+        <td>{{run.run_by}}</td>
+        <td>{{run.etl_status}}</td>
+        <td>{{run.updated_at | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+        <td>{{run.et_starttime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+        <td>{{run.et_runtime | number: 2}}</td>
+        <td>{{run.load_starttime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+        <td>{{run.load_runtime | number: 2}}</td>
+        <td>{{run.etl_error_truncated}}</td>
+      </tr>
+      <tr ng-switch-when="true">
+        <td colspan="20">{{run.etl_error}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

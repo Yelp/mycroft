@@ -1,0 +1,40 @@
+# FORMAT
+#
+# <table_name_1>:
+#   src: <path.to.log.field>   # root key
+#   src_type: <list|dict|sparse_list>
+#   columns:
+#   - log_key: <key_1>        # relative to root key
+#     sql_attr: <attr>        # type, sortkey, distkey,, etc
+#     name: <name>            # OPTIONAL: column name if different from log_key
+#     is_json: <true>         # OPTIONAL: hint to store column as JSON
+#     is_mandatory: <true>    # OPTIONAL: hint to prohibit null values
+#     is_derived: <true>      # OPTIONAL: derive field from row data
+#                                 'name' must be present, 'log_key' is ignored
+#   - log_key: <foreign_key>  # foreign key, absolute path
+#     sql_attr:  <attr>
+#     is_foreign: <true>
+#   - log_key: index          # OPTIONAL: list index (sparselist too)
+#     sql_attr: smallint
+#   sortkey_attr:             # sortkey(s) for this table
+#   - <name>                  # column name
+#<table_name_2>:
+#
+# EXPECTED JSON ROW FORMAT
+# if src_type = list:
+#     { index: <idx>, value: src[<idx>], foreign_key_1: foreign_key_1, ... }
+# if src_type = dict:
+#     { dict, foreign_key_1: foreign_key_1, ... }
+# if src_type = sparse_list:
+#     { index: <key>, value: src[<key>], foreign_key_1: foreign_key_1, ... }
+tables:
+  people:
+    columns:
+    - log_key: height
+      sql_attr: int2
+    - log_key: name
+      sql_attr: varchar(7)
+    sortkey_attr: []
+    src: ''
+    src_type: dict
+version: 1

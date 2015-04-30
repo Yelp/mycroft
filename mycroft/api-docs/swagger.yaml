@@ -1,0 +1,11 @@
+swaggerVersion: '1.2'
+apiVersion: '0.1'
+apis:
+  - path: /schema
+  - path: /jobs
+  - path: /runs
+  - path: /clusters
+  - path: /log_source
+info:
+  title: Mycroft API (unstable)
+  contact: bam@yelp.com

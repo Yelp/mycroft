@@ -1,0 +1,71 @@
+# FORMAT
+#
+# <table_name_1>:
+#   src: <path.to.log.field>   # root key
+#   src_type: <list|dict|sparse_list>
+#   columns:
+#   - log_key: <key_1>        # relative to root key
+#     sql_attr: <attr>        # type, sortkey, distkey,, etc
+#     name: <name>            # OPTIONAL: column name if different from log_key
+#     is_json: <true>         # OPTIONAL: hint to store column as JSON
+#     is_mandatory: <true>    # OPTIONAL: hint to prohibit null values
+#     is_derived: <true>      # OPTIONAL: derive field from row data
+#                                 'name' must be present, 'log_key' is ignored
+#   - log_key: <foreign_key>  # foreign key, absolute path
+#     sql_attr:  <attr>
+#     is_foreign: <true>
+#   - log_key: index          # OPTIONAL: list index (sparselist too)
+#     sql_attr: smallint
+#   sortkey_attr:             # sortkey(s) for this table
+#   - <name>                  # column name
+#<table_name_2>:
+#
+# EXPECTED JSON ROW FORMAT
+# if src_type = list:
+#     { index: <idx>, value: src[<idx>], foreign_key_1: foreign_key_1, ... }
+# if src_type = dict:
+#     { dict, foreign_key_1: foreign_key_1, ... }
+# if src_type = sparse_list:
+#     { index: <key>, value: src[<key>], foreign_key_1: foreign_key_1, ... }
+tables:
+  table_1:
+    columns:
+    - is_foreign: true
+      log_key: bar.client
+      name: client
+      sql_attr: varchar(13)
+    - is_foreign: true
+      is_json: true
+      log_key: bar.experiments
+      name: experiments
+      sql_attr: varchar(65535)
+    - log_key: request_id
+      sql_attr: varchar(16) distkey
+      log_key: start_time
+      sql_attr: TIMESTAMP not null
+    - is_derived: true
+      name: __source_filename__
+      sql_attr: varchar(4096)
+    sortkey_attr:
+    - start_time
+    src: foo
+    src_type: dict
+  table_2:
+    columns:
+    - is_mandatory: true
+      log_key: index
+      sql_attr: smallint not null
+    - is_foreign: true
+      log_key: foo.request_id
+      name: foo_request_id
+      sql_attr: varchar(16) distkey
+    - is_foreign: true
+      is_mandatory: true
+      log_key: foo.start_time
+      name: foo_start_time
+      sql_attr: TIMESTAMP not null
+    sortkey_attr:
+    - foo_start_time
+    src: foo.list
+    src_type: list
+version: 25

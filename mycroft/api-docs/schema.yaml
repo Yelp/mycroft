@@ -1,0 +1,102 @@
+swaggerVersion: '1.2'
+apiVersion: '0.1'
+consumes: [application/json]
+produces: [application/json]
+basePath: /
+apis:
+  - path: /v1/schema/{log_name}/{version}
+    operations:
+      - type: CreateSchemaResult
+        nickname: create_schema
+        summary: stores a schema to S3
+        method: POST
+        parameters:
+          - name: log_name
+            paramType: path
+            type: string
+            required: true
+          - name: version
+            paramType: path
+            type: string
+            required: true
+          - name: body
+            paramType: body
+            type: CreateSchemaRequest
+            required: true
+        responseMessages:
+          - code: 404
+            message: invalid log_name or log_version
+          - code: 500
+            message: unknown exception
+      - type: ReadSchemaResult
+        nickname: read_schema
+        summary: reads a schema from S3
+        method: GET
+        parameters:
+          - name: log_name
+            paramType: path
+            type: string
+            required: true
+          - name: version
+            paramType: path
+            type: string
+            required: true
+        responseMessages:
+          - code: 404
+            message: invalid log_name or log_version
+          - code: 404
+            message: No document found for this log_name, log_version
+          - code: 500
+            message: unknown exception
+  - path: /v1/schema/{log_name}
+    operations:
+      - type: ReadSchemaVersions
+        nickname: read_schema_versions
+        summary: "gets a dict of {log_name: [schema_version]}"
+        method: GET
+        parameters:
+          - name: log_name
+            paramType: path
+            type: string
+            required: true
+        responseMessages:
+          - code: 404
+            message: invalid log_name
+          - code: 500
+            message: unknown exception
+  - path: /v1/schema
+    operations:
+      - type: array
+        items: {"$ref": "ReadSchemaVersions"}
+        nickname: read_all_schemas
+        summary: "gets a dict of {schemas: [{log_name: [schema_versions]}]}"
+        method: GET
+        responseMessages:
+          - code: 500
+            message: unknown exception
+
+models:
+  CreateSchemaRequest:
+    id: CreateSchemaRequest
+    properties:
+      schema: {type: string}
+    required: [schema]
+  CreateSchemaResult:
+    id: CreateSchemaResult
+    properties:
+      log_name: {type: string}
+      log_version: {type: string}
+      bytes_written : {type: int}
+    required: [log_name, log_version, bytes_written]
+  ReadSchemaResult:
+    id: ReadSchemaResult
+    properties:
+      log_name: {type: string}
+      log_version: {type: string}
+      url: {type: string}
+    required: [log_name, log_version, url]
+  ReadSchemaVersions:
+    id: ReadSchemaVersions
+    properties:
+      schemas: {type: array}
+    required: [log_name, versions]

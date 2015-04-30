@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="mycroftApp">
+    <head>
+        <title>Mycroft</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.27/angular.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.27/angular-route.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <script src="/static/js/ui-bootstrap-tpls-0.11.0.min.js"></script>
+        <!-- use local underscore because it's not available via https -->
+        <script src="/static/js/underscore-min.js"></script>
+
+        <script src="/static/js/navbar.js"></script>
+        <script src="/static/js/view-schema.js"></script>
+        <script src="/static/js/upload-schema.js"></script>
+        <script src="/static/js/create-jobs.js"></script>
+        <script src="/static/js/view-jobs.js"></script>
+        <script src="/static/js/create-datastores.js"></script>
+        <script src="/static/js/app.js"></script>
+        <script src="/static/js/mycroftService.js"></script>
+        <link rel="stylesheet" href="/static/css/mycroft.css">
+    </head>
+
+    <body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-default navbar-static-top" role="navigation" ng-controller="NavbarController">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mycroft-navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <span class="navbar-brand"><a href="./">Mycroft Admin</a></span>
+            </div>
+            <div class="collapse navbar-collapse" id="mycroft-navbar">
+                <ul class="nav navbar-nav">
+                    <li ng-class="{dropdown: true, active: isActive('/schema/')}">
+                      <a href="" class="dropdown-toggle" data-toggle="dropdown">Schemas<span class="caret"></span></a>
+                      <ul class="dropdown-menu" role="menu">
+                        <li ng-class="{ active: isActive('/schema/upload')}"><a href="#/schema/upload">Upload schema</a></li>
+                        <li ng-class="{ active: isActive('/schema/view')}"><a href="#/schema/view">View schemas</a></li>
+                      </ul>
+                    </li>
+                    <li ng-class="{dropdown: true, active: isActive('/jobs/')}">
+                      <a href="" class="dropdown-toggle" data-toggle="dropdown">Jobs<span class="caret"></span></a>
+                      <ul class="dropdown-menu" role="menu">
+                        <li ng-class="{ active: isActive('/jobs/create')}"><a href="#/jobs/create">New job</a></li>
+                        <li ng-class="{ active: isActive('/jobs/view')}"><a href="#/jobs/view">View jobs</a></li>
+                      </ul>
+                    </li>
+                    <li ng-class="{dropdown: true, active: isActive('/datastores/')}">
+                        <a href="" class="dropdown-toggle" data-toggle="dropdown">Datastores<span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li ng-class="{ active: isActive('/datastores/register')}"><a href="#/datastores/register" target="_blank">Register New datastore</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div ng-view></div>
+
+    </body>
+</html>

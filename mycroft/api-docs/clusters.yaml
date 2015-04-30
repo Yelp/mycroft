@@ -1,0 +1,102 @@
+consumes: [application/json]
+produces: [application/json]
+basePath: /
+apis:
+  - path: /v1/clusters/{cluster_name}
+    operations:
+      - type: array
+        method: GET
+        items: {"$ref": "Cluster"}
+        nickname: read_clusters_name
+        summary: read cluster with a particular name from the backing store
+        parameters:
+          - name: cluster_name
+            paramType: path
+            type: string
+            required: true
+        responseMessages:
+          - code: 404
+            message: invalid cluster_name
+          - code: 500
+            message: unknown exception
+  - path: /v1/clusters
+    operations:
+      - type: array
+        method: GET
+        items: {"$ref": "Cluster"}
+        nickname: read_clusters
+        summary: read all clusters from the backing store
+        responseMessages:
+          - code: 500
+            message: unknown exception
+      - type: boolean
+        method: POST
+        nickname: create_cluster
+        summary: creates a cluster
+        parameters:
+          - name: body
+            paramType: body
+            type: ClusterInput
+            required: true
+        responseMessages:
+          - code: 404
+            message: invalid cluster parameters
+          - code: 500
+            message: unknown exception
+          - code: 502
+            message: post failed due to dynamo connection issue
+models:
+  Cluster:
+    id: Cluster
+    required:
+      - redshift_id
+      - host
+      - port
+      - db_schema
+      - groups
+    properties:
+      redshift_id: {type: string}
+      port: {type: int}
+      host:
+        type: string
+        description: e.g., cluster.us-west-2.redshift.amazonaws.com
+      db_schema:
+        type: string
+        description: default is PUBLIC
+      groups:
+        type: array
+        items: {type: string}
+      node_type:
+        type: string
+        description: the type of the cluster e.g., dw1.xlarge
+      node_count:
+        type: int
+        description: the number of nodes in the cluster e.g., 1
+  ClusterInput:
+    id: ClusterInput
+    required:
+      - redshift_id
+      - host
+      - port
+    properties:
+      redshift_id:
+        type: string
+        description: "the name of the cluster; Most important it must be unique.  Cluster names must be 1-63 alphanumeric chars or hyphens, first character must be a letter, cannot end with a hyphen or contain two consecutive hyphens, e.g., logs-infra-cluster"
+      port: {type: int}
+      host:
+        type: string
+        description: e.g., cluster.us-west-2.redshift.amazonaws.com
+      db_schema:
+        type: string
+        description: default is PUBLIC
+      groups:
+        type: array
+        items:
+          type: string
+          description: a group name used in redshift-postgres  e.g., team_search.
+      node_type:
+        type: string
+        description: the type of the cluster e.g., dw1.xlarge
+      node_count:
+        type: int
+        description: the number of nodes in the cluster e.g., 1

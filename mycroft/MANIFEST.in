@@ -1,0 +1,21 @@
+recursive-include api-docs *.yaml
+recursive-include mycroft/avro *.json
+recursive-include mycroft/static *.css *.js *.html
+include config-env-dev.yaml Makefile mycroft.wsgi oddjob-1.0.1-standalone.jar requirements*.txt sherlock/tools/gen_aws_tmp_creds.sh
+recursive-exclude sherlock/batch *
+recursive-exclude sherlock/views *
+include sherlock/batch/s3_to_psv.py
+include sherlock/batch/ingest_multiple_dates.py
+include sherlock/batch/mr_mysqldump.py
+include sherlock/batch/mr_json.py
+include sherlock/batch/mr_redshift_etl.py
+include sherlock/batch/__init__.py
+include sherlock/batch/s3_to_redshift.py
+exclude sherlock/tools/audit_redshift_clusters.py
+exclude sherlock/tools/fake_oddjob.py
+exclude sherlock/tools/override_schema.py
+exclude sherlock/tools/proto2schema.py
+exclude sherlock/tools/search_session_log2schema.py
+exclude tests/backend/test_start_scanners_workers.py
+exclude sherlock/tools/test_new_schema.py
+exclude mycroft/backend/start_scanners_workers.py

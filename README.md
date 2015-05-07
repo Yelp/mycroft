@@ -1,10 +1,22 @@
 # Mycroft
 
-Mycroft is an orchestrator that coordinates MRJob, S3, and Redshift to automatically perform light transformations on daily log data.  Just specify a cluster, schema version, s3 path, and start date, and Mycroft will watch S3 for new data, transforming and loading data without user action.  Mycroft's web interface can be used to monitor the progress of in-flight data loading jobs, and to pause, resume, cancel or delete existing jobs.  Mycroft will notify via email when new data is successfully loaded or if any issues arise.  It also provides tools to automatically generate schemas from log data, and even manages the expiration of old data as well as vacuuming and analyzing data.
+Mycroft is an orchestrator that coordinates MRJob, S3, and Redshift to automatically perform light transformations on daily log data.  Just specify a cluster, schema version, s3 path, and start date, and Mycroft will watch S3 for new data, transforming and loading data without user action.  More specifically Mycroft will take json data stored in S3 and map it to a format that can be copied into Redshift using a schema you define.  The results of that map are stored back into S3, then loaded into Redshift.  Mycroft's web interface can be used to monitor the progress of in-flight data loading jobs, and to pause, resume, cancel or delete existing jobs.  Mycroft will notify via email when new data is successfully loaded or if any issues arise.  It also provides tools to automatically generate schemas from log data, and even manages the expiration of old data as well as vacuuming and analyzing data.
 
+## Mycroft architecture
+
+Mycroft is comprised of three services: an api, worker and scanner. The API is used to add jobs, control them and track their progress.  The worker is used to run jobs, and the scanner is used to monitor the tables Mycroft uses to store the job metadata, and insert jobs into an SQS queue for the worker.
+ 
 ## Getting Started with Mycroft
 
-To get up and running with Mycroft, you'll need AWS credentials that Mycroft can use and a VPC ID.  With this information, the Mycroft creation script will provision all the AWS services that Mycroft needs to operate.
+To get up and running with Mycroft, you'll need AWS credentials that Mycroft can use and a VPC ID.  With this information, the Mycroft creation script will provision all the AWS services that Mycroft needs to operate.  The following AWS services are used:
+
+* S3 to store the transformed data, and the schemas you define for the transformation
+* Redshift to store the final results
+* DynamoDB to store the job metadata
+* SQS to queue jobs for the worker
+* EC2 to kick off the transformations
+* EMR to do the transformations
+* IAM to create the EMR role, EMREC2 role and the MycroftEMREC2 instance profile
 
 Docker should be installed, and running `docker ps` should complete successfully before proceeding.
 

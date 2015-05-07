@@ -4,7 +4,7 @@ Mycroft is an orchestrator that coordinates MRJob, S3, and Redshift to automatic
 
 ## Mycroft architecture
 
-Mycroft is comprised of three services: an api, worker and scanner. The API is used to add jobs, control them and track their progress.  The worker is used to run jobs, and the scanner is used to monitor the tables Mycroft uses to store the job metadata, and insert jobs into an SQS queue for the worker.
+Mycroft is comprised of three services: an API, worker and scanner. The API is used to add jobs, control them and track their progress.  The worker is used to run jobs, and the scanner is used to monitor the tables Mycroft uses to store the job metadata, and insert jobs into an SQS queue for the worker.
  
 ## Getting Started with Mycroft
 

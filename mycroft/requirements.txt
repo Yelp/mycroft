@@ -13,7 +13,7 @@ pyramid-swagger==1.1.0
 #pyramid_uwsgi_metrics==0.3.0
 python-snappy==0.5
 repoze.lru==0.6
-requests==2.2.1
+requests==2.20.0
 #scribe==2.0.post1
 tornado==2.4.1
 translationstring==1.1

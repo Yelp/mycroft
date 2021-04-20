@@ -15,4 +15,4 @@ mccabe==0.2.1
 pep8==1.5.7
 pyflakes==0.8.1
 # implicit requirements for pytest
-py==1.4.25
+py==1.10.0

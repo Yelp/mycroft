@@ -7,7 +7,7 @@ flake8
 pytest
 mock
 tox
-pip==1.4.1
+pip==19.2
 setuptools>=0.9
 wheel>=0.21
 # implicit requirements for flake8

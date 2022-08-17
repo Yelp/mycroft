@@ -1,3 +1,8 @@
+**Deprecation Notice**
+
+Mycroft is now archived, but we're glad you're checking out Yelp Engineering's work on GitHub! If you'd like to learn more about what we're
+up to now, please visit our [tech blog](https://engineeringblog.yelp.com/) to get the latest scoop on Yelp Engineering.
+
 # Mycroft
 
 Mycroft is an orchestrator that coordinates MRJob, S3, and Redshift to automatically perform light transformations on daily log data.  Just specify a cluster, schema version, s3 path, and start date, and Mycroft will watch S3 for new data, transforming and loading data without user action.  More specifically Mycroft will take json data stored in S3 and map it to a format that can be copied into Redshift using a schema you define.  The results of that map are stored back into S3, then loaded into Redshift.  Mycroft's web interface can be used to monitor the progress of in-flight data loading jobs, and to pause, resume, cancel or delete existing jobs.  Mycroft will notify via email when new data is successfully loaded or if any issues arise.  It also provides tools to automatically generate schemas from log data, and even manages the expiration of old data as well as vacuuming and analyzing data.
